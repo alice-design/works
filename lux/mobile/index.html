@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Luxgen U6</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=640">
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">
+
+        <link href="http://dimsemenov.com/plugins/royal-slider/royalslider/royalslider.css" rel="stylesheet">
+        <link href="http://dimsemenov.com/plugins/royal-slider/preview-assets/css/reset.css?v=1.0.4" rel="stylesheet">
+        <link href="http://dimsemenov.com/plugins/royal-slider/royalslider/skins/default-inverted/rs-default-inverted.css?v=1.0.4" rel="stylesheet">
+
+        <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+    </head>
+    <body>
+        
+        <div class="outer-wrapper">
+            <header class="clearfix">
+                <h1 class="hide-text">
+                    <a href="http://www.luxgen-motor.com.tw/">Luxgen</a>
+                </h1>
+                <nav>
+                    <a href="#" id="navToggle"></a>
+                    <a href="index.html" class="hide-text" id="navHome">首頁</a>
+                    <ul class="acc">
+                        <li><a href="http://www.luxgen-motor.com.tw/u6_Turbo.html">車型網</a></li>
+                        <li><a href="campaign-terms.html">活動辦法</a></li>
+                    </ul>
+                </nav>
+            </header><!-- /header -->
+
+            <section id="homeSec" class="uniSection">
+                <h2><img src="img/ui/mainTitle.png" alt=""></h2>
+                <div id="u6Wrap">
+                    <img src="img/homeCar.png" alt="">
+                </div>
+                <div id="homeCatch">
+                    <img src="img/homeHotLove.png" alt="熱愛無限">
+                    <p><span>讓多元夢想不再與熱情擦身而過 </span>以前瞻思維創造出多元魅力的新世代SUV</p>
+                </div>
+                <div id="ccw"> 
+                    <div id="homeStart">
+                        <a id="signin" href="#">
+                            <img src="img/ui/fbStart.png" alt="">
+                        </a>
+                    </div>
+                    <div id="mainFoot">
+                        納智捷汽車 版權所有 © 2013 Luxgen All Rights Reserved.
+                    </div>
+                </div>       
+            </section>
+
+        </div>
+        
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
+        <script src="js/plugins.js"></script>
+        <!-- // <script src="js/main.js"></script> -->
+        <script src="http://dimsemenov.com/plugins/royal-slider/royalslider/jquery.royalslider.min.js?v=9.3.6"></script>
+
+        <script>
+
+
+        var app_id = '170582636468453';
+        var fbaccess_token = '';
+        var redirect_uri  = location.href;
+        var imgFile = '';
+        var fb_name = '';
+
+        window.fbAsyncInit = function() {
+            
+            FB.init({
+                appId      : app_id, // App ID
+                //  channelURL : '//WWW.YOUR_DOMAIN.COM/channel.html', // Channel File
+                status     : true, // check login status
+                cookie     : true, // enable cookies to allow the server to access the session
+                oauth      : true, // enable OAuth 2.0
+                xfbml      : true  // parse XFBML
+            }); // End FB.init.
+
+        }
+
+        $(document).ready(function(){
+
+            var _ajaxStart = false;
+
+            $(document).ajaxStart(function(){
+                _ajaxStart = true;
+            }).ajaxSend(function(){
+            }).ajaxStop(function(){
+                _ajaxStart = false;
+            }).ajaxSuccess(function(){
+                _ajaxStart = false;
+            }).ajaxError(function(){
+                _ajaxStart = false;
+            }).ajaxComplete(function(){
+                _ajaxStart = false;
+            });
+
+            $("#signin").click(function(){
+
+                FB.login(function(response){
+                    
+                    if (response.authResponse) {
+                        
+                        var uid = response.authResponse.userID;
+                        var fbaccess_token = response.authResponse.accessToken;
+
+                        FB.api({
+                            method: 'fql.query',
+                            query: 'SELECT uid, name, email, pic_big FROM user WHERE uid = ' + uid
+                        }, function(rep){
+                            if (!isEmpty(rep)) {
+                                if (_ajaxStart == false) {
+                                    $.ajax({
+                                        url: "http://event.luxgen-motor.com.tw/u6_turbo/httphandler/connect.ashx",
+                                        type: "post",
+                                        data: "name=" + rep[0].name + "&fbid=" + rep[0].uid + "&email=" + rep[0].email,
+                                        dataType: "json",
+                                        success: function (data) {
+                                            if (data.ErrorString == "error") {
+                                                alert('error');
+                                            } else {
+                                                setCookie('fb_id', rep[0].uid);
+                                                setCookie('fb_email', rep[0].email);
+                                                setCookie('fb_name', rep[0].name);
+                                                location.href = 'poll.html';
+                                            }
+                                        },
+                                        error: function (err) {
+                                            alert("請重新登入 facebook");
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
+                    } else {
+                        // console.log('User cancelled login or did not fully authorize.');
+                    }
+                }, {scope: 'email,user_likes'});
+
+                return false;
+
+            });
+        });
+
+        function isEmpty (obj) {
+            for (var prop in obj) {
+                if (obj.hasOwnProperty(prop))
+                    return false;
+            }
+            return true;
+        }
+
+        function setCookie(c_name, value, exdays) {
+            var exdate = new Date();
+            //  save cookie in 5 min.
+            exdate.setTime(exdate.getTime() + (5 * 60) * 1000); 
+            var c_value = escape(value) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
+            document.cookie = c_name + "=" + c_value;
+        }
+
+        function getCookie(c_name) {
+            var i,x,y,ARRcookies=document.cookie.split(";");
+            for (i=0;i<ARRcookies.length;i++) {
+                x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+                y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+                x=x.replace(/^\s+|\s+$/g,"");
+                if (x==c_name) {
+                    return unescape(y);
+                }
+            }
+        }
+        //------------------may's   
+        $('nav > ul').css('height', '100%');
+
+        $('#navToggle').click(function(){
+            
+            if ($('nav > ul').hasClass('open')) {
+                // close
+                $('nav > ul').fadeOut().removeClass('open');
+            } else {
+                // open
+                $('nav > ul').fadeIn().addClass('open');
+            }
+
+        });
+        //^^^^^^^^^^^^^^^^^^ may's
+
+        // Load the SDK Asynchronously
+        (function(d){
+          var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
+          js = d.createElement('script'); js.id = id; js.async = true;
+          js.src = "//connect.facebook.net/zh_TW/all.js";
+          d.getElementsByTagName('head')[0].appendChild(js);
+        }(document));
+
+        </script>
+
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+         
+          ga('create', 'UA-45634515-1', 'luxgen-motor.com.tw');
+          ga('send', 'pageview');
+         
+        </script>
+        <div id="fb-root"></div>
+    </body>
+</html>
